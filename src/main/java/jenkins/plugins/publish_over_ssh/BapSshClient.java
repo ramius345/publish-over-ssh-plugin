@@ -146,7 +146,7 @@ public class BapSshClient extends BPDefaultClient<BapSshTransfer> {
             exec.setOutputStream(buildInfo.getListener().getLogger(), true);
             exec.setErrStream(buildInfo.getListener().getLogger(), true);
             connectExecChannel(exec, Util.replaceMacro(transfer.getExecCommand(), buildInfo.getEnvVars()));
-            waitForExec(exec, transfer.getExecTimeout());
+            waitForExec(exec, transfer.getExecTimeout() , transfer.sendKeepalives() );
             final int status = exec.getExitStatus();
             if (status != 0)
                 throw new BapPublisherException(Messages.exception_exec_exitStatus(status));
@@ -225,13 +225,26 @@ public class BapSshClient extends BPDefaultClient<BapSshTransfer> {
         }
     }
 
-    private void waitForExec(final ChannelExec exec, final long timeout) {
+    private void waitForExec(final ChannelExec exec, final long timeout , boolean sendKeepalives) {
         final long start = System.currentTimeMillis();
         final Thread waiter = new ExecCheckThread(exec);
+        PingerThread pingerThread = new PingerThread(session);
         waiter.start();
+        
+        if (sendKeepalives){
+        	pingerThread.start();
+        }
+       
         try {
             waiter.join(timeout);
         } catch (InterruptedException ie) { }
+        
+        
+        if (sendKeepalives) {
+        	pingerThread.stopPinging();
+        	pingerThread.interrupt();
+        }
+        
         final long duration = System.currentTimeMillis() - start;
         if (waiter.isAlive()) {
             waiter.interrupt();
@@ -244,7 +257,7 @@ public class BapSshClient extends BPDefaultClient<BapSshTransfer> {
     private static final class ExecCheckThread extends Thread {
         private static final int POLL_TIME = 200;
         private final ChannelExec exec;
-
+     
         ExecCheckThread(final ChannelExec exec) {
             this.exec = exec;
         }
@@ -254,8 +267,34 @@ public class BapSshClient extends BPDefaultClient<BapSshTransfer> {
                 while (!exec.isClosed()) {
                     Thread.sleep(POLL_TIME);
                 }
-            } catch (InterruptedException ie) { }
+            } catch (InterruptedException ie) { } 
         }
+    }
+    
+    private static final class PingerThread extends Thread {
+    	private static final int POLL_TIME = 200;
+    	private final Session session;
+    	private boolean keepPinging;
+    	
+    	PingerThread(final Session session){
+    		this.session = session;
+    		keepPinging = true;
+    	}
+    	
+    	@Override
+    	public void run() {
+    		try {
+    			while( session.isConnected() && keepPinging == true ) {    				
+    				session.sendKeepAliveMsg();
+    			}
+    			
+    		} catch (Exception e) {}
+    	}
+    	
+    	public void stopPinging() {
+    		keepPinging = false;
+    	}
+    	
     }
 
 }
