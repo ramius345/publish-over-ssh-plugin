@@ -32,14 +32,18 @@ public final class SshPluginDefaultsHandler implements InvocationHandler {
     private static final String GET_EXEC_COMMAND = "getExecCommand";
     private static final String GET_EXEC_TIMEOUT = "getExecTimeout";
     private static final String IS_USE_PTY = "isUsePty";
+    private static final String IS_USE_SEND_KEEPALIVES = "isSendKeepalives";
 
     public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
-        if (method.getName().equals(GET_EXEC_COMMAND))
+    	String methodName = method.getName();
+        if (methodName.equals(GET_EXEC_COMMAND))
             return getExecCommand();
-        else if (method.getName().equals(GET_EXEC_TIMEOUT))
+        else if (methodName.equals(GET_EXEC_TIMEOUT))
             return getExecTimeout();
-        else if (method.getName().equals(IS_USE_PTY))
+        else if (methodName.equals(IS_USE_PTY))
             return isPseudoTty();
+        else if( methodName.equals(IS_USE_SEND_KEEPALIVES))
+        	return isSendKeepalives();
         return method.invoke(SshPluginDefaults.GLOBAL_DEFAULTS, args);
     }
 
@@ -54,5 +58,8 @@ public final class SshPluginDefaultsHandler implements InvocationHandler {
     public boolean isPseudoTty() {
         return SshTransferOptions.DEFAULT_USE_PTY;
     }
-
+    
+    public boolean isSendKeepalives() {
+    	return SshTransferOptions.DEFAULT_SEND_KEEPALIVES;
+    }
 }

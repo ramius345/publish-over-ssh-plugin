@@ -97,7 +97,7 @@ public class BapSshTransfer extends BPTransfer implements Describable<BapSshTran
                 .append("execCommand", execCommand)
                 .append("execTimeout", execTimeout)
                 .append("pseudoTty", usePty)
-                .append("Keepalives",sendKeepalives);
+                .append("sendKeepalives",sendKeepalives);
     }
 
     public boolean equals(final Object that) {

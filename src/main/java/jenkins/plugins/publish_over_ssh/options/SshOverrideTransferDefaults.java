@@ -45,6 +45,7 @@ public class SshOverrideTransferDefaults implements SshTransferOptions, Describa
     private final boolean flatten;
     private final boolean cleanRemote;
     private final boolean usePty;
+    private boolean sendKeepalives;
     private final boolean noDefaultExcludes;
     private final boolean makeEmptyDirs;
     private final String patternSeparator;
@@ -53,7 +54,8 @@ public class SshOverrideTransferDefaults implements SshTransferOptions, Describa
     public SshOverrideTransferDefaults(final String sourceFiles, final String excludes, final String removePrefix,
                                        final String remoteDirectory, final boolean flatten, final boolean remoteDirectorySDF,
                                        final boolean cleanRemote, final String execCommand, final int execTimeout, final boolean usePty,
-                                       final boolean noDefaultExcludes, final boolean makeEmptyDirs, final String patternSeparator) {
+                                       final boolean sendKeepalives, final boolean noDefaultExcludes, final boolean makeEmptyDirs, 
+                                       final String patternSeparator) {
         this.cleanRemote = cleanRemote;
         this.excludes = excludes;
         this.execCommand = execCommand;
@@ -64,6 +66,7 @@ public class SshOverrideTransferDefaults implements SshTransferOptions, Describa
         this.removePrefix = removePrefix;
         this.sourceFiles = sourceFiles;
         this.usePty = usePty;
+        this.sendKeepalives = sendKeepalives;
         this.noDefaultExcludes = noDefaultExcludes;
         this.makeEmptyDirs = makeEmptyDirs;
         this.patternSeparator = patternSeparator;
@@ -113,6 +116,10 @@ public class SshOverrideTransferDefaults implements SshTransferOptions, Describa
         return usePty;
     }
 
+    public boolean isSendKeepalives() {
+    	return sendKeepalives;
+    }
+    
     public boolean isNoDefaultExcludes() {
         return noDefaultExcludes;
     }

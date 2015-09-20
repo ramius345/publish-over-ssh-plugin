@@ -66,5 +66,7 @@
         <f:checkbox default="${defaults.transfer.usePty}"/>
     </f:entry>
     
-
+     <f:entry title="${%sendKeepalives}" field="sendKeepalives">
+        <f:checkbox default="${defaults.transfer.sendKeepalives}"/>
+     </f:entry>
 </j:jelly>
